@@ -1,6 +1,5 @@
 # Sisop-1-2026-IT-075
 
-## Anggota
 | Nama | NRP |
 |--------------|-----|
 | Nayla Aisha Hanifa | 5027241075 |
@@ -129,7 +128,7 @@ END {
     }
 }
 ```
-Bagian `END` dijalankan **setelah** semua baris selesai dibaca. Di sini menampilkan hasil sesuai opsi yang dipilih:
+Bagian `END` dijalankan setelah semua baris selesai dibaca. Di sini menampilkan hasil sesuai opsi yang dipilih:
 
 - **Opsi a** 
 Langsung cetak variabel `count_passenger` yang sudah berisi total penumpang
@@ -140,11 +139,14 @@ Sebelum mencetak, lakukan dulu `for (c in carriages) total_carriage++` yaitu men
 - **Opsi c** 
 Cetak nama penumpang tertua (`oldest_name`) dan usianya (`max_age`) yang sudah tersimpan saat memproses data
 
-- **Opsi d** → Hitung rata-rata dengan `total_age / count_passenger`, lalu bungkus dengan `int()` agar hasilnya berupa bilangan bulat tanpa desimal (misal 30.7 tahun menjadi 30 tahun). Kemudian cetak hasilnya
+- **Opsi d** 
+Hitung rata-rata dengan `total_age / count_passenger`, lalu bungkus dengan `int()` agar hasilnya berupa bilangan bulat tanpa desimal (misal 30.7 tahun menjadi 30 tahun). Kemudian cetak hasilnya
 
-- **Opsi e** → Cetak variabel `business` yang berisi jumlah penumpang Business Class
+- **Opsi e** 
+Cetak variabel `business` yang berisi jumlah penumpang Business Class
 
-- **Selain a-e** → Cetak pesan error yang menjelaskan opsi yang valid beserta contoh cara penggunaan yang benar
+- **Selain opsi a-e** 
+Cetak pesan error yang menjelaskan opsi yang valid beserta contoh cara penggunaan yang benar
 
 ---
 

@@ -162,17 +162,17 @@ awk -f KANJ.sh passenger.csv z   # Contoh opsi tidak dikenal → muncul pesan er
 ### Output
 
 - `OPSI A`
-![alt text](image-2.png)
+![hasil output opsi a](assets/image-2.png)
 - `OPSI B`
-![alt text](image-3.png)
+![hasil output opsi b](assets/image-3.png)
 - `OPSI C`
-![alt text](image-4.png)
+![hasil output opsi c](assets/image-4.png)
 - `OPSI D`
-![alt text](image-5.png)
+![hasil output opsi d](assets/image-5.png)
 - `OPSI E`
-![alt text](image-6.png)
+![hasil output opsi e](assets/image-6.png)
 - `OPSI SELAIN A-E`
-![alt text](image-7.png)
+![hasil output selain opsi a-e](assets/image-7.png)
 
 ---
 

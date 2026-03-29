@@ -179,7 +179,7 @@ awk -f KANJ.sh passenger.csv z   # Contoh opsi tidak dikenal → muncul pesan er
 ---
 
 ### Kendala
-Tidak ada kendala
+Belum terbiasa untuk menggunakan ataupun mengoperasikan linux 
 
 ---
 ---
@@ -332,4 +332,4 @@ chmod +x nemupusaka.sh
 ![output no 2](assets/output%20no%202.png)
 
 ### Kendala
-
+Belum terbiasa untuk menggunakan ataupun mengoperasikan linux 

@@ -60,14 +60,14 @@ ARGV[1] = passenger.csv (File data yang mau dibaca)
 ARGV[2] = a (Huruf opsi yang diketik tadi)
 Jadi, alasan pakai ARGV[2] adalah karena si huruf a berada di urutan ketiga (indeks ke 2) dari yang diketik di terminal.
 
-**2. Bagian FNR == 1  (Melewati Baris Header)**
+**2. Bagian NR == 1 - Melewati Baris Header**
 ```awk
-FNR == 1 { next }
+NR == 1 { next }
 ```
-- `FNR` adalah nomor baris saat ini
-- `FNR == 1` artinya "jika ini adalah baris pertama"
+- `NR` adalah nomor baris total yang sudah dibaca AWK
+- `NR == 1` artinya "jika ini adalah baris pertama"
 - `{ next }` artinya "lewati baris ini, jangan diproses"
-- Baris pertama CSV adalah header (`Nama Penumpang,Usia,Kursi Kelas,Gerbong`) bukan data penumpang, jadi tidak usah ikut dihitung
+- Ini penting karena baris pertama CSV adalah header (`Nama Penumpang,Usia,Kursi Kelas,Gerbong`) bukan data penumpang, jadi tidak boleh ikut dihitung
 
 **3. Bagian Pengolahan Data - Membaca Setiap Baris**
 Jadi dicode saya menjelaskan bahwa 
@@ -183,4 +183,153 @@ Tidak ada kendala
 
 ---
 ---
+## Soal 2 - EKSPEDISI PESUGIHAN GUNUNG KAWI
+
+### Penjelasan
+
+Soal 2 untuk membantu Mas Amba menemukan lokasi pusaka yang tersembunyi di Gunung Kawi. Paman dari Mas Amba meninggalkan sebuah peta rahasia berbentuk file PDF. Di dalam peta tersebut, ada petunjuk rahasia yang mengarah ke sebuah tempat penyimpanan data koordinat. Caranya adalah dengan mengunduh peta ekspedisi dalam format PDF, menemukan link tersembunyi di dalamnya, meng-clone repository dari link tersebut, kemudian mengolah data koordinat yang ada untuk menemukan titik pusat lokasi pusaka.
+
+---
+
+#### Langkah 1 - Mendapatkan File PDF dan Clone Repository
+
+File `peta-ekspedisi-amba.pdf` disimpan ke dalam folder `ekspedisi/`. Di dalam file PDF tersebut terdapat sebuah URL tersembunyi yang mengarah ke repository GitHub berisi data koordinat lokasi ekspedisi pamannya mas amba.
+
+URL yang ditemukan di dalam PDF:
+```
+https://github.com/pocongcyber77/peta-gunung-kawi.git
+```
+
+Repository tersebut di-clone ke dalam folder `ekspedisi/` menggunakan perintah:
+```bash
+git clone https://github.com/pocongcyber77/peta-gunung-kawi.git
+```
+
+Perintah `git clone` akan mengunduh seluruh isi repository. Hasilnya adalah folder `peta-gunung-kawi/` yang berisi file `gsxtrack.json` dengan data koordinat titik-titik lokasi ekspedisi.
+
+---
+
+#### Langkah 2 - Memahami Isi gsxtrack.json
+
+File `gsxtrack.json` berisi data titik-titik lokasi dalam format JSON dengan field-field seperti `id`, `site_name`, `latitude`, dan `longitude`. Data ini masih dalam format mentah JSON yang sulit dibaca langsung, sehingga perlu di-parse menjadi format yang lebih rapi.
+
+---
+
+#### Langkah 3 - parserkoordinat.sh
+
+Script `parserkoordinat.sh` bertugas membaca file `gsxtrack.json` dan mengekstrak data penting ke dalam file `titik-penting.txt` dengan format yang lebih rapi dan mudah dibaca.
+```bash
+#!/bin/bash
+
+grep -E '"id"|"site_name"|"latitude"|"longitude"' gsxtrack.json | \
+awk '
+/"id"/ { id=$0; gsub(/.*: "|",?$/, "", id) }
+/"site_name"/ { name=$0; gsub(/.*: "|",?$/, "", name) }
+/"latitude"/ { lat=$0; gsub(/.*: |,?$/, "", lat) }
+/"longitude"/ { lon=$0; gsub(/.*: |,?$/, "", lon); print id","name","lat","lon }
+' > titik-penting.txt
+
+echo "Parsing selesai! Hasil disimpan di titik-penting.txt"
+cat titik-penting.txt
+```
+
+**Penjelasan baris per baris:**
+
+- `grep -E '"id"|"site_name"|"latitude"|"longitude"' gsxtrack.json` → Perintah `grep` digunakan untuk menyaring baris-baris dari file JSON yang hanya mengandung kata `id`, `site_name`, `latitude`, atau `longitude`. Baris lain yang tidak relevan akan diabaikan. Tanda `|` artinya "atau"
+
+- `| \` → Tanda pipe (`|`) meneruskan hasil `grep` tadi ke perintah berikutnya yaitu `awk`. Tanda `\` berarti perintah masih berlanjut ke baris berikutnya
+
+- Di dalam `awk`:
+  - `/"id"/ { id=$0; gsub(/.*: "|",?$/, "", id) }` → Jika baris mengandung kata `"id"`, simpan seluruh baris ke variabel `id`, lalu gunakan `gsub` untuk menghapus semua karakter yang tidak perlu (seperti tanda kutip, titik dua, koma) sehingga hanya tersisa nilai id-nya saja (contoh: `node_001`)
+  
+  - `/"site_name"/ { name=$0; gsub(/.*: "|",?$/, "", name) }` → Sama seperti di atas tapi untuk nama lokasi. Hasilnya contohnya: `Titik Berak Paman Mas Mba`
+  
+  - `/"latitude"/ { lat=$0; gsub(/.*: |,?$/, "", lat) }` → Sama untuk latitude. Hasilnya contohnya: `-7.920000`
+  
+  - `/"longitude"/ { lon=$0; gsub(/.*: |,?$/, "", lon); print id","name","lat","lon }` → Sama untuk longitude. Setelah longitude berhasil diambil, langsung cetak semua data dalam satu baris dengan format `id,nama,latitude,longitude`
+
+- `> titik-penting.txt` → Menyimpan semua output ke file `titik-penting.txt`
+
+- `echo "Parsing selesai!..."` → Menampilkan pesan bahwa proses selesai
+
+- `cat titik-penting.txt` → Menampilkan isi file hasil parsing ke layar
+
+**Hasil file titik-penting.txt:**
+```
+node_001,Titik Berak Paman Mas Mba,-7.920000,112.450000
+node_002,Basecamp Mas Fuad,-7.920000,112.468100
+node_003,Gerbang Dimensi Keputih,-7.937960,112.468100
+node_004,Tembok Ratapan Keputih,-7.937960,112.450000
+```
+
+---
+
+#### Langkah 4 - nemupusaka.sh
+
+Script `nemupusaka.sh` bertugas menghitung koordinat titik pusat dari keempat titik lokasi yang membentuk persegi. Titik pusat inilah yang merupakan lokasi pusaka yang dicari Mas Amba.
+```bash
+#!/bin/bash
+
+lat1=$(awk -F',' 'NR==1{print $3}' titik-penting.txt)
+lon1=$(awk -F',' 'NR==1{print $4}' titik-penting.txt)
+lat3=$(awk -F',' 'NR==3{print $3}' titik-penting.txt)
+lon3=$(awk -F',' 'NR==3{print $4}' titik-penting.txt)
+
+lat_tengah=$(awk "BEGIN {printf \"%.6f\", ($lat1 + $lat3) / 2}")
+lon_tengah=$(awk "BEGIN {printf \"%.6f\", ($lon1 + $lon3) / 2}")
+
+echo "Koordinat pusat: $lat_tengah, $lon_tengah"
+echo "$lat_tengah, $lon_tengah" > posisipusaka.txt
+```
+
+**Penjelasan baris per baris:**
+
+- `lat1=$(awk -F',' 'NR==1{print $3}' titik-penting.txt)` → Mengambil nilai latitude dari baris pertama (node_001) di file titik-penting.txt:
+  - `-F','` → pemisah kolom adalah koma
+  - `NR==1` → hanya baris pertama
+  - `{print $3}` → cetak kolom ke-3 (latitude)
+  - Hasilnya disimpan ke variabel `lat1`
+
+- `lon1=$(awk -F',' 'NR==1{print $4}' titik-penting.txt)` → Sama seperti di atas tapi mengambil longitude (kolom ke-4) dari baris pertama, disimpan ke `lon1`
+
+- `lat3` dan `lon3` → Sama seperti di atas tapi mengambil dari baris ke-3 (node_003) yang merupakan titik diagonal dari node_001
+
+- `lat_tengah=$(awk "BEGIN {printf \"%.6f\", ($lat1 + $lat3) / 2}")` → Menghitung rata-rata latitude dengan rumus `(lat1 + lat3) / 2`. Menggunakan `printf "%.6f"` agar hasil ditampilkan dengan 6 angka di belakang koma
+
+- `lon_tengah` → Sama seperti di atas tapi untuk longitude
+
+- `echo "Koordinat pusat: ..."` → Menampilkan hasil koordinat pusat ke layar
+
+- `echo "$lat_tengah, $lon_tengah" > posisipusaka.txt` → Menyimpan koordinat pusat ke file `posisipusaka.txt`
+
+**Mengapa menggunakan node_001 dan node_003?**
+
+Berdasarkan petunjuk dari Sang Dukun, keempat titik koordinat membentuk sebuah **persegi**. Lokasi pusaka berada tepat di tengah persegi tersebut. Untuk mencari titik tengah persegi, cukup hitung rata-rata dari dua titik yang saling **berhadapan secara diagonal** yaitu node_001 (pojok kiri atas) dan node_003 (pojok kanan bawah).
+
+Rumusnya:
+```
+Titik Tengah = ((lat1 + lat3) / 2 , (lon1 + lon3) / 2)
+```
+
+**Hasil posisipusaka.txt:**
+```
+-7.928980, 112.459050
+```
+
+---
+
+#### Cara Menjalankan Script
+```bash
+# Jalankan parser koordinat terlebih dahulu
+bash parserkoordinat.sh
+
+# Jalankan pencari lokasi pusaka
+chmod +x nemupusaka.sh
+./nemupusaka.sh
+```
+
+### Output
+![output no 2](assets/output%20no%202.png)
+
+### Kendala
 
